@@ -1,0 +1,46 @@
+---
+title: "Baby lifetime locations"
+author: "JiBorman"
+date: "3/12/2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE, message=F, echo=F}
+knitr::opts_chunk$set(echo = FALSE)
+options(stringsAsFactors = F)
+library(plotly)
+library(ggmap)
+```
+
+## Graphic inputs
+We want to know where Baby has been during his lifetime. He's been on four trips, twice to NYC for a total of 6 days, once to Houston for 2 days and once to Washington, D.C. for five days. Otherwise, he's been in Boston. 
+```{r Setup, echo = TRUE, message=F}
+Birthdate <- "2016-12-06"
+CitiesVisted <- c('Boston','New York City', 'Houston','Washington, D.C.')
+TripLength<-c(NA, 6, 2, 5)
+LifeLength <- as.numeric(Sys.Date()-as.Date(Birthdate))
+TripLength[is.na(TripLength)] <- LifeLength - sum(TripLength, na.rm = T)
+df <- data.frame(name = CitiesVisted,
+                 lat=geocode(CitiesVisted)$lat,
+                 lng=geocode(CitiesVisted)$lon,
+                 pLife=TripLength/LifeLength)
+```
+
+## Where has baby been?
+
+```{r pressure, warning=F, message=F}
+plot_ly(data = df, labels=df$name, values=100*df$pLife, type='pie',
+        textposition = 'inside',
+        textinfo = 'label+percent',
+        insidetextfont = list(color = '#FFFFFF'),
+        hoverinfo = 'text',
+        text = ~paste0(100*df$pLife, ' %'),
+        marker = list(colors = colors,
+                      line = list(color = '#FFFFFF', width = 1)),
+        showlegend = FALSE) %>%
+  layout(title = "Baby's Lifetime travel",
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+  
+```
+
